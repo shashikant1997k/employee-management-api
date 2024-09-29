@@ -11,20 +11,7 @@ const moment = require("moment");
  */
 const createUser = async (userBody) => {
   const deferred = Q.defer();
-  const isUserExist = await User.isUserNameTaken(userBody.UserName);
-  const isEmployeeCodeExist = await User.isEmployeeCodeTaken(
-    userBody.EmployeeCode
-  );
-  if (isUserExist) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "UserName already taken");
-  }
 
-  if (isEmployeeCodeExist) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "EmployeeCode already taken");
-  }
-
-  let passwordExpiry = moment().add(90, "days").toDate();
-  userBody.passwordExpiry = passwordExpiry;
   const createdUser = await User.create(userBody);
 
   const userObj = {
@@ -87,21 +74,18 @@ const updateUserById = async (userId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
 
-  if (updateBody.email && (await User.isUserNameTaken(updateBody.UserName))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
-  }
-
   Object.assign(user, updateBody);
   const result = await User.findOneAndUpdate(
     { _id: userId },
     {
       $set: {
-        Email: updateBody.Email,
-        UserRole: updateBody.UserRole,
         FirstName: updateBody.FirstName,
         LastName: updateBody.LastName,
-        Mobile: updateBody.Mobile,
-        Active: updateBody.Active,
+        Age: updateBody.Age,
+        EmployeeCode: updateBody.EmployeeCode,
+        Department: updateBody.Department,
+        DateOfJoining: updateBody.DateOfJoining,
+        Title: updateBody.Title,
       },
     },
     { new: true }
